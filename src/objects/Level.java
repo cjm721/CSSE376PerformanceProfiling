@@ -199,6 +199,8 @@ public class Level {
 	 *            the pixel size of a tile. 32 is perferable.
 	 */
 	BufferedImage img;
+
+	private boolean[][] updated;
 	public void populateMap(String fileName, int tileSize) {
 		try {
 			String parser = " ";
@@ -212,7 +214,8 @@ public class Level {
 			this.mapHeight = Integer.parseInt(imageReader.readLine());
 
 			this.map = new int[this.mapHeight][this.mapWidth];
-
+			this.updated = new boolean[this.mapHeight][this.mapWidth];
+			
 			for (int r = 0; r < this.map.length; r++) {
 				// Get line of numbers and spaces.
 				currentLine = imageReader.readLine();
@@ -225,6 +228,7 @@ public class Level {
 					// Convert the String integers into integer values to be
 					// stored in level.
 					this.map[c][r] = Integer.parseInt(currentLineValues[c]);
+					this.updated[c][r] = true;
 				}
 			}
 			img = new BufferedImage(this.mapWidth*this.tileSize,this.mapHeight*this.tileSize,BufferedImage.TYPE_INT_RGB);
@@ -357,9 +361,11 @@ public class Level {
 	 *            the Graphics2D object to draw on.
 	 */
 	public void drawTileImage(int tileValue, int row, int col, Graphics2D g2) {
-		// FIXME: reduce the number of calls to the code below. When does drawImage really need to be called?
-		BufferedImage image = this.images.get(tileValue);
-		g2.drawImage(image, row * this.tileSize, col * this.tileSize, null);
+		if(this.updated[col][row]) {
+			BufferedImage image = this.images.get(tileValue);
+			g2.drawImage(image, row * this.tileSize, col * this.tileSize, null);
+			this.updated[col][row] = false;
+		}
 	}
 
 	/**
@@ -384,6 +390,7 @@ public class Level {
 	 */
 	public void updateTile(int x, int y, int tileID) {
 		this.map[x][y] = tileID;
+		this.updated[y][x] = true;
 	}
 
 	/**
